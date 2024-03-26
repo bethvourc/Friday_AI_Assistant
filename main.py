@@ -1,5 +1,5 @@
 import os
-import time  
+import time
 import pyaudio
 import playsound
 from gtts import gTTS
@@ -7,34 +7,37 @@ import openai
 import speech_recognition as sr
 
 api_key = "PUT_IN_API_KEY"
-
-# language AI will use
 lang = "en"
 
 openai.api_key = api_key
 
-while True:
-    def get_audio():
-        r = sr.Recognizer() # using speach recognition
-        with sr.Microphone(device_index=1) as source: # set up our Microphone
-            audio = r.listen(source) # listens to the audio
-            said = "" # to store the audio that comes in 
+def get_audio():
+    r = sr.Recognizer()
+    with sr.Microphone(device_index=1) as source:
+        print("Listening...")
+        audio = r.listen(source)
+        said = ""
 
-            # to make the computer listen for keyword to active (an example will be apples "hey siri")
-            try:
-                said = r.recognize_google(audio)
-                print(said)
+        try:
+            said = r.recognize_google(audio)
+            print("You said:", said)
 
-                if "Friday" in said:
-                    completion = openai.ChatCompletion.create(model="gpt-4-turbo", messages=[{"role": "user", "content": said}])
-                    text = completion.choices[0].messages.content
-                    speech = gTTS(text=text, lang=lang, slow=False, tld="com.au") # tld is used to get the accent that the AI will use 
-                    speech.save("welcome1.mp3")
-                    playsound.playsound("welcome1.mp3")
+            if "Friday" in said:
+                completion = openai.Completion.create(engine="text-davinci-003", prompt=said, max_tokens=50)
+                text = completion.choices[0].text.strip()
+                speech = gTTS(text=text, lang=lang, slow=False, tld="com.au")
+                speech.save("response.mp3")
+                playsound.playsound("response.mp3")
 
-            except Exception:
-                print("Exceptions")
+        except Exception as e:
+            print("Exception:", str(e))
 
-        return said
-    
-    get_audio()
+    return said
+
+def main():
+    while True:
+        get_audio()
+        time.sleep(1)  # Prevents constant activation, adjust as necessary
+
+if __name__ == "__main__":
+    main()
