@@ -1,6 +1,5 @@
 import os
 import time
-import pyaudio
 import playsound
 from gtts import gTTS
 import openai
